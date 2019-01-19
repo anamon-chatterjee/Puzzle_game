@@ -1,0 +1,235 @@
+import java.util.Random;
+import java.awt.*;
+import java.awt.event.*;
+import java.applet.*;
+public class GamePuzzle extends Frame
+{
+	int move=0;
+	Button cell[][]=new Button[4][4];
+	Label l1,l2,l3,l4;
+	GamePuzzle ob;
+	int number[][]=new int[4][4];
+	int check[]=new int[16];
+	Random ran=new Random();
+	public GamePuzzle()
+	{
+		super("puzzle");
+		ob=this;
+		setResizable(false);
+		{
+			for(int j=0;j<4;j++)
+			{
+				int k=0;
+				while(k<4)
+				{
+					int value=1+ran.nextInt(15);
+					if(j==3&&k==3)
+					{	
+						number[3][3]=999;
+						break;
+					}
+					else
+					{
+						if(check[value]==0)
+						{
+							System.out.println(value);
+							System.out.println("prev:"+check[value]);
+							number[j][k]=value;
+							k++;
+							check[value]=1;
+							System.out.println("after:"+check[value]);
+						}
+					}
+				}
+			}
+		}
+		
+		for(int i=0;i<4;i++)
+			for(int j=0;j<4;j++)
+		{
+			cell[i][j]=new Button(""+number[i][j]);
+			cell[i][j].addActionListener(new MyButton());
+		}
+			cell[3][3].setLabel("");
+			l1=new Label("moves");
+			l2=new Label(""+0);
+			l3=new Label("validity");
+			l4=new Label("N/A");
+			Panel p=new Panel();
+			Panel p1=new Panel();
+			p.setLayout(new GridLayout(4,4));
+			for(int i=0;i<4;i++)
+				for(int j=0;j<4;j++)
+			{
+				p.add(cell[i][j]);
+			}
+			p1.setLayout(new GridLayout(1,4));
+			p1.add(l1);p1.add(l2);p1.add(l3);p1.add(l4);
+			setLayout(new BorderLayout());
+			add(p,BorderLayout.CENTER);
+			add(p1,BorderLayout.SOUTH);
+			addWindowListener(new MyWindow());
+	}
+	public class MyButton implements ActionListener
+	{
+		int a,j,k,p,q;
+		int flag;
+		public void actionPerformed(ActionEvent ae)
+		{
+			flag=0;
+			System.out.println("Inside method flag="+flag);
+			int mat[][]=new int[4][4];
+			for(int i=0;i<4;i++)
+			for(int k=0;k<4;k++)
+			{
+				if(cell[i][k].getLabel()=="")
+					mat[i][k]=999;
+				else
+				mat[i][k]=Integer.parseInt(cell[i][k].getLabel());
+			}
+				if(ae.getActionCommand().equals(""))
+					a=999;
+				else
+				{
+					a=Integer.parseInt(ae.getActionCommand());
+				
+					for(j=0;j<4;j++)
+					{
+						for(k=0;k<4;k++)
+						{
+							if(mat[j][k]==a)
+							{
+								if(k!=3)
+								{
+									if(mat[j][k+1]==999)
+									{
+										cell[j][k+1].setLabel(""+a);
+										cell[j][k].setLabel("");
+										mat[j][k+1]=a;
+										mat[j][k]=999;
+										move=move+1;
+										l2.setText(""+move);
+										l4.setText("valid");
+										//System.out.println("if k!=3");
+										break;
+									}
+								}
+								if(k!=0)
+								{
+									if(mat[j][k-1]==999)
+									{
+										cell[j][k-1].setLabel(""+a);
+										cell[j][k].setLabel("");
+										mat[j][k-1]=a;
+										mat[j][k]=999;
+										move=move+1;
+										l2.setText(""+move);
+										l4.setText("valid");
+										//System.out.println("if k!=0");
+										break;
+									}
+								}
+								if(j!=3)
+								{
+									if(mat[j+1][k]==999)
+									{	
+										cell[j+1][k].setLabel(""+a);
+										cell[j][k].setLabel("");
+										mat[j+1][k]=a;
+										mat[j][k]=999;
+										move=move+1;
+										l2.setText(""+move);
+										l4.setText("valid");
+										//System.out.println("if j!=3");
+										break;
+									}
+								}
+								if(j!=0)
+								{
+									if(mat[j-1][k]==999)
+									{	
+										cell[j-1][k].setLabel(""+a);
+										cell[j][k].setLabel("");
+										mat[j-1][k]=a;
+										mat[j][k]=999;
+										move=move+1;
+										l2.setText(""+move);
+										l4.setText("valid");
+										//System.out.println("if j!=0");
+										break;
+									}
+								}
+								l4.setText("invalid");
+								break;
+							}
+						}
+						if(k<4)
+						{
+							break;
+						}
+					}
+				
+					for(p=0;p<4;p++)
+					{
+						for(q=0;q<3;q++)
+						{
+							if(mat[p][q]>mat[p][q+1])
+							{
+								flag=1;
+								System.out.println("inside first loop");
+								break;
+							}
+						}
+						if(flag==1)
+							break;
+						else if(p!=3)
+						{
+							if(mat[p][3]>mat[p+1][0])
+							{
+
+								flag=1;
+								System.out.println("inside 2nd loop");
+								break;
+							}
+						}
+					}
+					System.out.println("flag="+flag);
+					if(flag==0)
+					{
+						System.out.println("game over");
+						GameOver obj=new GameOver(ob);
+						obj.setSize(400,300);
+						obj.setVisible(true);
+						obj.setLocationRelativeTo(null);
+					}
+				}
+		}
+		
+	}
+	public class MyWindow implements WindowListener
+	{
+		public void windowActivated(WindowEvent we)
+		{}
+		public void windowClosed(WindowEvent we)
+		{}
+		public void windowClosing(WindowEvent we)
+		{
+			System.exit(0);
+		}			
+		public void windowDeactivated(WindowEvent we)
+		{}
+		public void windowDeiconified(WindowEvent we)
+		{}
+		public void windowOpened(WindowEvent we)
+		{}
+		public void windowIconified(WindowEvent we)
+		{}
+	}
+	public static void main(String args[])
+	{
+		GamePuzzle game=new GamePuzzle();
+		game.setSize(500,500);
+		game.setVisible(true);
+		game.setLocationRelativeTo(null);
+	}
+}
